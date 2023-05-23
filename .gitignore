@@ -1,1 +1,2 @@
-build/
+build/libgetargs.a
+build/libgetargs.so

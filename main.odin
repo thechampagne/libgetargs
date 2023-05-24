@@ -8,6 +8,11 @@ getargs_t :: struct {
     _getargs : rawptr,
 }
 
+getargs_payload_t :: struct #raw_union {
+    boolean: u8,
+    str: [^]c.char,
+}
+
 getargs_optarg_option_t :: enum(i32) {
     GETARGS_OPTARG_OPTION_NONE,
     GETARGS_OPTARG_OPTION_REQUIRED,
@@ -59,6 +64,33 @@ getargs_optarg_option_t :: enum(i32) {
 	return 1
     } else {
 	return 0
+    }
+}
+
+@export getargs_get_payload :: proc "c" (self: ^getargs_t, arg_name: cstring, is_err: ^c.int, is_boolean: ^c.int) -> getargs_payload_t {
+    context = runtime.default_context()
+    arg, is_true := get_payload(cast(^Getargs)self._getargs, string(arg_name))
+    if !is_true {
+	is_err^ = 1
+	return getargs_payload_t{
+	    str = nil,
+	}
+    }
+    ret, is_bool := arg.payload.(bool)
+    if (is_bool) {
+	is_boolean^ = 1
+	return getargs_payload_t{
+	    boolean = u8(ret),
+	}
+    }
+    str_len : uint = len(arg.payload.(string))
+    cstr := cast([^]c.char) libc.malloc(str_len + 1)
+    for v,i in arg.payload.(string) {
+	cstr[i] = u8(v)
+    }
+    cstr[str_len] = 0
+    return getargs_payload_t{
+	str = cstr,
     }
 }
 

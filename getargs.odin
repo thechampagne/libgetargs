@@ -15,7 +15,6 @@ Optarg_Option :: enum {
 	Optional,
 }
 
-@(private = "file")
 Argument :: struct {
 	option:  Optarg_Option,
 	payload: Optarg,
@@ -248,20 +247,15 @@ get_flag :: proc(self: ^Getargs, arg_name: string, loc := #caller_location) -> b
  * represents whether the option was provided at all.  It will
  * always return the same result as if get_flag was called.
  */
-get_payload :: proc(self: ^Getargs, arg_name: string, loc := #caller_location) -> (string, bool) {
+get_payload :: proc(self: ^Getargs, arg_name: string, loc := #caller_location) -> (Argument, bool) {
 	idx, ok := self.arg_map[arg_name]
 	if !ok {
 		fmt.eprintf("No such argument `%s': ", arg_name)
 		fmt.eprintln(loc)
-		return "", false
+	    return Argument { .None, "" }, false
 	}
 	arg := self.arg_vec[idx]
 
-	ret, is_bool := arg.payload.(bool)
-	if (is_bool) {
-		return "", ret
-	}
-
-	return arg.payload.(string), true
+        return arg, true
 }
 

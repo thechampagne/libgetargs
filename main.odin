@@ -97,7 +97,6 @@ getargs_optarg_option_t :: enum(i32) {
 @export getargs_clean :: proc "c" (self: ^getargs_t) {
     context = runtime.default_context()
     destroy(cast(^Getargs)self._getargs)
-    libc.free(self)
 }
 
 c_to_odin_Optarg_Option :: proc(opt: getargs_optarg_option_t) -> Optarg_Option {
